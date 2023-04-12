@@ -24,6 +24,9 @@ static int nus_service_access_cb(uint16_t conn_handle, uint16_t attr_handle,
 static uint16_t ble_uuid_128_to_16(const ble_uuid128_t *uuid128)
 {
     uint16_t uuid16;
+    // print uuid128 in buffer
+    ESP_LOG_BUFFER_HEX("uuid128", uuid128->value, 16);
+    
     uuid16 = (uuid128->value[12] << 8) | uuid128->value[13];
     return uuid16;
 }
@@ -72,13 +75,15 @@ static int nus_service_access_cb(uint16_t conn_handle, uint16_t attr_handle,
     const ble_uuid128_t *uuid128;
     uint16_t uuid;
     int rc;
-
+    
     // Define the 16-bit UUIDs for the NUS_RX and NUS_TX characteristics
-    const uint16_t NUS_RX_CHARACTERISTIC_UUID_16 = 0x0002;
-    const uint16_t NUS_TX_CHARACTERISTIC_UUID_16 = 0x0003;
+    const uint16_t NUS_RX_CHARACTERISTIC_UUID_16 = 0x0200;
+    const uint16_t NUS_TX_CHARACTERISTIC_UUID_16 = 0x0300;
 
     uuid128 = (const ble_uuid128_t *)ctxt->chr->uuid;
     uuid = ble_uuid_128_to_16(uuid128);
+
+    ESP_LOGI(TAG, "nus_service_access_cb uuid: %04x op: %d", uuid, ctxt->op);
 
     if (uuid == NUS_RX_CHARACTERISTIC_UUID_16) {
         if (ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR) {
