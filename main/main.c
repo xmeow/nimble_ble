@@ -89,7 +89,7 @@ int ble_evt_cb(struct ble_gap_event *event, void *arg)
 static void ble_on_sync(void)
 {
     int rc;
-
+    ESP_LOGI(TAG, "BLE Synced");
     // Retrieve the address type
     rc = ble_hs_id_infer_auto(0, &own_addr_type);
     assert(rc == 0);
@@ -104,6 +104,15 @@ static void ble_on_sync(void)
         ESP_LOGE(TAG, "Error enabling advertising; rc=%d", rc);
         return;
     }
+}
+
+void ble_client_task(void *param)
+{
+    ESP_LOGI(TAG, "BLE Host Task Started");
+    // Wait for the BLE host to start
+    nimble_port_run();
+
+    nimble_port_freertos_deinit();
 }
 
 static void start_ble_host(void)
@@ -124,7 +133,7 @@ static void start_ble_host(void)
     nimble_port_init();
 
     // Start the NimBLE host task
-    nimble_port_freertos_init(start_ble_host);
+    nimble_port_freertos_init(ble_client_task);
 }
 
 
